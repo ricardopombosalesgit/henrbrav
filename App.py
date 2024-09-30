@@ -64,7 +64,6 @@ def calcular_pontuacao(df, posicoes, tier1_cols, tier2_cols, tier3_cols, tier_we
 
     return df_filtered
 
-# Função para definir os tiers com base no grupo de posições escolhido
 def definir_tiers_por_grupo(grupo_escolhido):
     if grupo_escolhido == 'Goleiros':
         tier1_cols = ['Goals Conceded', 'Saves', 'Clean sheets']
@@ -73,23 +72,23 @@ def definir_tiers_por_grupo(grupo_escolhido):
 
     elif grupo_escolhido == 'Laterais':
         tier1_cols = ['Defensive challenges', 'Defensive challenges won', 'Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate']
-        tier2_cols = ['Tackles', 'Tackles successful', 'Interceptions', 'Interceptions']
+        tier2_cols = ['Tackles', 'Tackles successful', 'Interceptions']
         tier3_cols = ['Passes', 'Passes accurate, %', 'Progressive passes', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %']
 
     elif grupo_escolhido == 'Zagueiros':
-        tier1_cols = ['Defensive challenges', 'Defensive challenges won', 'Air challenges', 'Air challenges won', 'Interceptions']
+        tier1_cols = ['Defensive challenges', 'Defensive challenges won', 'Air challenges', 'Air challenges won']
         tier2_cols = ['Tackles', 'Tackles successful', 'Interceptions', 'Passes accurate, %', 'Passes']
         tier3_cols = ['Challenges', 'Challenges won', 'Progressive passes', 'Progressive passes accurate', 'Crosses', 'Crosses accurate']
 
     elif grupo_escolhido == 'Volantes/Meio defensivos':
-        tier1_cols = ['Defensive challenges', 'Defensive challenges won', 'Interceptions', 'Picking up']
+        tier1_cols = ['Defensive challenges', 'Defensive challenges won', 'Picking up']
         tier2_cols = ['Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate', 'Passes', 'Passes accurate, %']
         tier3_cols = ['Challenges', 'Challenges won, %', 'Progressive passes', 'Progressive passes accurate', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %']
 
     elif grupo_escolhido == 'Meio-Atacantes':
         tier1_cols = ['Passes', 'Passes accurate, %', 'Key passes', 'Key passes accurate', 'Progressive passes', 'Progressive passes accurate']
         tier2_cols = ['Passes into the penalty box', 'Passes into the penalty box accurate', 'Final third entries', 'Final third entries through carry', 'Shots', 'Shots on target']
-        tier3_cols = ['Challenges', 'Challenges won, %', 'Defensive challenges', 'Defensive challenges won, %', 'Attacking challenges', 'Attacking challenges won, %', 'Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate', 'Interceptions']
+        tier3_cols = ['Challenges', 'Challenges won, %', 'Defensive challenges', 'Defensive challenges won, %', 'Attacking challenges', 'Attacking challenges won, %', 'Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate']
 
     elif grupo_escolhido == 'Extremos/Pontas':
         tier1_cols = ['Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate', 'Dribbles', 'Dribbles successful, %']
