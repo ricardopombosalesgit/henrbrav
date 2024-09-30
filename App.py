@@ -13,14 +13,15 @@ def agrupar_posicoes_em_portugues():
         'Atacantes': ['CF']
     }
 
-def calcular_pontuacao(df, posicoes, tier1_cols, tier2_cols, tier3_cols, tier_weights, min_minutos, max_idade):
+def calcular_pontuacao(df, posicoes, tier1_cols, tier2_cols, tier3_cols, tier_weights, min_minutos, max_minutos, max_idade):
 
     # Converter a coluna de idade para numérico, forçando erros a serem NaN
     df['Age'] = pd.to_numeric(df['Age'], errors='coerce')
 
-    # Filtrar jogadores pela posição, minutos jogados e idade
+    # Filtrar jogadores pela posição, minutos jogados, minutagem máxima e idade
     df_filtered = df[df['Position'].isin(posicoes) & 
-                     (df['Minutes played'] >= min_minutos) & 
+                     (df['Minutes played'] >= min_minutos) &
+                     (df['Minutes played'] <= max_minutos) &
                      (df['Age'] <= max_idade)].copy()
 
     if df_filtered.empty:
@@ -39,7 +40,7 @@ def calcular_pontuacao(df, posicoes, tier1_cols, tier2_cols, tier3_cols, tier_we
     for col in tier1_cols + tier2_cols + tier3_cols:
         if col in df_filtered.columns:
             df_filtered[col] = df_filtered[col].astype(str).str.replace('-', '0').str.replace('%', '')
-            df_filtered[col] = pd.to_numeric(df_filtered[col])
+            df_filtered[col] = pd.to_numeric(df_filtered[col], errors='coerce')
 
     # Normalizar as métricas na escala de 0 a 10
     for col in tier1_cols + tier2_cols + tier3_cols:
@@ -61,6 +62,9 @@ def calcular_pontuacao(df, posicoes, tier1_cols, tier2_cols, tier3_cols, tier_we
         tier_weights['Tier 2'] * df_filtered['Tier 2'] +
         tier_weights['Tier 3'] * df_filtered['Tier 3']
     )
+
+    # Calcular o Impacto por Minuto (Pontuação Final / Minutagem * 1000)
+    df_filtered['Impacto por Minuto'] = (df_filtered['Pontuação Final'] / df_filtered['Minutes played']) * 1000
 
     return df_filtered
 
@@ -135,14 +139,16 @@ if uploaded_file is not None:
 
         # Filtros
         min_minutos = st.number_input('Minutos jogados mínimos:', min_value=0, value=200)
+        max_minutos = st.number_input('Minutagem máxima (opcional):', min_value=0, value=3000)
         max_idade = st.number_input('Idade máxima:', min_value=0, value=40)
 
         # Definir os Tiers de acordo com o grupo de posições escolhido
         tier1_cols, tier2_cols, tier3_cols = definir_tiers_por_grupo(grupo_escolhido)
 
         # Calcular a pontuação
-        resultados = calcular_pontuacao(df, posicoes_selecionadas, tier1_cols, tier2_cols, tier3_cols, tier_weights, min_minutos, max_idade)
+        resultados = calcular_pontuacao(df, posicoes_selecionadas, tier1_cols, tier2_cols, tier3_cols, tier_weights, min_minutos, max_minutos, max_idade)
 
         # Exibir os resultados
         if not resultados.empty:
-            st.write(resultados[['Player', 'Team', 'Age', 'Minutes played', 'Pontuação Final']].sort_values('Pontuação Final', ascending=False))
+            st.write(resultados[['Player', 'Team', 'Age', 'Minutes played', 'Pontuação Final', 'Impacto por Minuto']].sort_values('Pontuação Final', ascending=False))
+            
