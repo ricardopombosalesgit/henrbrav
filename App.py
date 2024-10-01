@@ -73,17 +73,17 @@ def definir_tiers_por_grupo(grupo_escolhido):
         'Laterais Direitos': (
             ['Defensive challenges', 'Defensive challenges won, %', 'Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate'],
             ['Tackles', 'Tackles successful', 'Interceptions'],
-            ['Passes', 'Passes accurate, %', 'Progressive passes', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %']
+            ['Passes', 'Passes accurate, %', 'Progressive passes', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %','Goals']
         ),
         'Laterais Esquerdos': (
             ['Defensive challenges', 'Defensive challenges won, %', 'Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate'],
             ['Tackles', 'Tackles successful', 'Interceptions'],
-            ['Passes', 'Passes accurate, %', 'Progressive passes', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %']
+            ['Passes', 'Passes accurate, %', 'Progressive passes', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %','Goals']
         ),
         'Zagueiros': (
             ['Defensive challenges', 'Defensive challenges won, %', 'Air challenges', 'Air challenges won'],
             ['Tackles', 'Tackles successful', 'Interceptions', 'Passes accurate, %', 'Passes'],
-            ['Challenges', 'Challenges won', 'Progressive passes', 'Progressive passes accurate', 'Crosses', 'Crosses accurate']
+            ['Challenges', 'Challenges won', 'Progressive passes', 'Progressive passes accurate', 'Crosses', 'Crosses accurate','Goals']
         ),
         'Segundos Volantes': (
             ['Defensive challenges', 'Defensive challenges won, %', 'Interceptions','Passes', 'Passes accurate, %', 'Progressive passes', 'Progressive passes accurate'],
@@ -93,15 +93,15 @@ def definir_tiers_por_grupo(grupo_escolhido):
         'Volantes/Meio defensivos': (
             ['Defensive challenges', 'Defensive challenges won', 'Picking up'],
             ['Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate', 'Passes', 'Passes accurate, %'],
-            ['Challenges', 'Challenges won, %', 'Progressive passes', 'Progressive passes accurate', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %']
+            ['Challenges', 'Challenges won, %', 'Progressive passes', 'Progressive passes accurate', 'Long passes', 'Long passes accurate', 'Attacking challenges', 'Attacking challenges won, %','Goals']
         ),
         'Meio-Atacantes': (
             ['Passes', 'Passes accurate, %', 'Key passes', 'Key passes accurate', 'Progressive passes', 'Progressive passes accurate'],
-            ['Passes into the penalty box', 'Passes into the penalty box accurate', 'Final third entries', 'Final third entries through carry', 'Shots', 'Shots on target'],
+            ['Passes into the penalty box', 'Passes into the penalty box accurate', 'Final third entries', 'Final third entries through carry', 'Shots', 'Shots on target','Goals'],
             ['Challenges', 'Challenges won, %', 'Defensive challenges', 'Defensive challenges won, %', 'Attacking challenges', 'Attacking challenges won, %', 'Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate']
         ),
         'Extremos/Pontas': (
-            ['Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate', 'Dribbles', 'Dribbles successful, %'],
+            ['Final third entries', 'Final third entries through carry', 'Crosses', 'Crosses accurate', 'Dribbles', 'Dribbles successful, %','Goals'],
             ['Chances', 'Chances successful', 'Chances successful, %', 'Shots', 'Shots on target', 'Key passes', 'Key passes accurate', 'Passes into the penalty box', 'Passes into the penalty box accurate'],
             ['Challenges', 'Challenges won, %', 'Defensive challenges', 'Defensive challenges won, %', 'Attacking challenges', 'Attacking challenges won, %', 'Tackles', 'Tackles successful', 'Interceptions', 'Crosses', 'Crosses accurate']
         ),
@@ -177,22 +177,24 @@ if uploaded_file is not None:
         sorted_results = resultados[['Player', 'Team', 'Age', 'Minutes played', 'Pontuação Final', 'Impacto por Minuto']].sort_values('Pontuação Final', ascending=False)
         st.dataframe(sorted_results.style.highlight_max(subset=['Pontuação Final'], color='lightgreen'), height=600)
 
-        # Visualizações com Matplotlib
-        st.subheader("Distribuição das Pontuações Finais")
-        fig, ax = plt.subplots()
+        # Visualizações com Matplotlib com tamanho reduzido
+        #st.subheader("Distribuição das Pontuações Finais")
+        fig, ax = plt.subplots(figsize=(5, 3))  # Tamanho reduzido: largura=5, altura=3
         ax.hist(sorted_results['Pontuação Final'], bins=20, color='skyblue', edgecolor='black')
         ax.set_xlabel('Pontuação Final')
         ax.set_ylabel('Frequência')
         ax.set_title('Distribuição das Pontuações Finais')
-        st.pyplot(fig)
+        plt.tight_layout()  # Ajusta o layout para evitar cortes
+        #st.pyplot(fig)
 
         st.subheader("Top 10 Jogadores")
         top_players = sorted_results.head(10)
-        fig2, ax2 = plt.subplots()
+        fig2, ax2 = plt.subplots(figsize=(5, 3))  # Tamanho reduzido: largura=5, altura=3
         ax2.barh(top_players['Player'], top_players['Pontuação Final'], color='green')
         ax2.set_xlabel('Pontuação Final')
         ax2.set_title('Top 10 Jogadores')
         ax2.invert_yaxis()  # Para exibir o maior valor no topo
+        plt.tight_layout()  # Ajusta o layout para evitar cortes
         st.pyplot(fig2)
 
         # Opcional: Botão para baixar os resultados
