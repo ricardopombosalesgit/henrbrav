@@ -122,24 +122,53 @@ st.title('Formulário de Avaliação de Jogadores')
 
 # Sidebar for configuration
 st.sidebar.header("Configurações")
-uploaded_file = st.sidebar.file_uploader("Escolha um arquivo de dados", type=["xlsx", "csv"])
 
-if uploaded_file is not None:
-    # Load data with caching
-    try:
-        if uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file, encoding='latin1')
-        elif uploaded_file.name.endswith('.xlsx'):
-            df = pd.read_excel(uploaded_file)
-    except Exception as e:
-        st.error(f"Erro ao carregar o arquivo: {e}")
+# Permitir upload de até 30 arquivos
+uploaded_files = st.sidebar.file_uploader(
+    "Escolha até 30 arquivos de dados (CSV ou XLSX)", 
+    type=["xlsx", "csv"], 
+    accept_multiple_files=True
+)
+
+if uploaded_files:
+    if len(uploaded_files) > 30:
+        st.sidebar.error("Você pode fazer upload de no máximo 30 arquivos.")
+        st.stop()
+    
+    # Lista para armazenar DataFrames
+    dataframes = []
+    # Lista para rastrear arquivos com erro
+    erro_arquivos = []
+
+    # Carregar cada arquivo
+    for uploaded_file in uploaded_files:
+        try:
+            if uploaded_file.name.endswith('.csv'):
+                df_temp = pd.read_csv(uploaded_file, encoding='latin1')
+            elif uploaded_file.name.endswith('.xlsx'):
+                df_temp = pd.read_excel(uploaded_file)
+            dataframes.append(df_temp)
+        except Exception as e:
+            erro_arquivos.append(f"{uploaded_file.name}: {e}")
+
+    # Se houver erros no carregamento de algum arquivo, exibir mensagens de erro
+    if erro_arquivos:
+        for erro in erro_arquivos:
+            st.error(f"Erro ao carregar o arquivo {erro}")
         st.stop()
 
-    # Validate essential columns
+    # Concatenar todos os DataFrames
+    try:
+        df = pd.concat(dataframes, ignore_index=True)
+    except Exception as e:
+        st.error(f"Erro ao concatenar os arquivos: {e}")
+        st.stop()
+
+    # Validar colunas essenciais
     required_columns = ['Player', 'Team', 'Age', 'Minutes played', 'Position']
     missing_required = [col for col in required_columns if col not in df.columns]
     if missing_required:
-        st.error(f"Faltam as seguintes colunas essenciais no arquivo: {missing_required}")
+        st.error(f"Faltam as seguintes colunas essenciais no(s) arquivo(s): {missing_required}")
         st.stop()
 
     grupos_posicoes = agrupar_posicoes_em_portugues()
@@ -174,18 +203,29 @@ if uploaded_file is not None:
     # Exibir os resultados
     if not resultados.empty:
         st.subheader("Resultados")
-        sorted_results = resultados[['Player', 'Team', 'Age', 'Minutes played', 'Pontuação Final', 'Impacto por Minuto']].sort_values('Pontuação Final', ascending=False)
-        st.dataframe(sorted_results.style.highlight_max(subset=['Pontuação Final'], color='lightgreen'), height=600)
+        sorted_results = resultados[['Player', 'Team', 'Age', 'Minutes played', 'Pontuação Final', 'Impacto por Minuto']].sort_values('Pontuação Final', ascending=False).reset_index(drop=True)
+
+        # Formatação das colunas
+        formatted_results = sorted_results.style \
+            .highlight_max(subset=['Pontuação Final'], color='lightgreen') \
+            .format({
+                'Age': '{:.0f}',
+                'Pontuação Final': '{:.1f}',
+                'Impacto por Minuto': '{:.1f}'
+            }) \
+            .hide(axis="index")  # Remove a exibição do índice
+
+        st.dataframe(formatted_results, height=600)
 
         # Visualizações com Matplotlib com tamanho reduzido
-        #st.subheader("Distribuição das Pontuações Finais")
+        st.subheader("Distribuição das Pontuações Finais")
         fig, ax = plt.subplots(figsize=(5, 3))  # Tamanho reduzido: largura=5, altura=3
         ax.hist(sorted_results['Pontuação Final'], bins=20, color='skyblue', edgecolor='black')
         ax.set_xlabel('Pontuação Final')
         ax.set_ylabel('Frequência')
         ax.set_title('Distribuição das Pontuações Finais')
         plt.tight_layout()  # Ajusta o layout para evitar cortes
-        #st.pyplot(fig)
+        st.pyplot(fig)
 
         st.subheader("Top 10 Jogadores")
         top_players = sorted_results.head(10)
@@ -207,4 +247,4 @@ if uploaded_file is not None:
         )
 
 else:
-    st.info("Por favor, faça o upload de um arquivo CSV ou XLSX para começar.")
+    st.info("Por favor, faça o upload de até 30 arquivos CSV ou XLSX para começar.")
